@@ -1,0 +1,58 @@
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+
+import config from "./config";
+import User from "../models/user.model";
+
+/* ---------------- GOOGLE STRATEGY ---------------- */
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: config.GOOGLE_CLIENT_ID,
+      clientSecret: config.GOOGLE_CLIENT_SECRET,
+      callbackURL: config.GOOGLE_CALLBACK_URL,
+    },
+
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value;
+
+        if (!email) return done(new Error("No email"));
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+          user = await User.create({
+            name: profile.displayName,
+            email,
+            password: "google-auth",
+          });
+        }
+
+        return done(null, user);
+      } catch (err) {
+        return done(err as Error);
+      }
+    }
+  )
+);
+
+/* ---------------- SERIALIZE ---------------- */
+passport.serializeUser((user: any, done) => {
+  done(null, user._id.toString());
+});
+
+/* ---------------- DESERIALIZE ---------------- */
+passport.deserializeUser(async (id: string, done) => {
+  try {
+    const user = await User.findById(id);
+
+    if (!user) return done(null, false);
+
+    done(null, user);
+  } catch (err) {
+    done(err as Error);
+  }
+});
+
+export default passport;

@@ -1,7 +1,17 @@
 import app from "./src/app.js";
+import connectDB from "./src/config/db.js";
+import config from "./src/config/config.js";
 
-console.log(" before listen");
+const startServer = async () => {
+  try {
+    await connectDB();
 
-app.listen(3000, () => {
-    console.log(" server running");
-});
+    app.listen(config.PORT, () => {
+      console.log(`🚀 Server running on port ${config.PORT}`);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+startServer();

@@ -1,90 +1,133 @@
-import { StateGraph, StateSchema, START, END, type GraphNode } from "@langchain/langgraph";
-import z from "zod"
-// import createAgent
-import { createAgent, HumanMessage, providerStrategy } from "langchain";
+import {
+  StateGraph,
+  StateSchema,
+  START,
+  END,
+  type GraphNode,
+} from "@langchain/langgraph";
 
-import { mistralModel, geminiModel, cohereModel } from "../ai/model.ai.js";
-import { es } from "zod/v4/locales";
+import z from "zod";
 
+import {
+  mistralModel,
+  geminiModel,
+  cohereModel,
+} from "../ai/model.ai";
+
+import {
+  JUDGE_PROMPT,
+  SYSTEM_PROMPT,
+} from "../ai/prompt.ai";
+
+// ---------------- STATE ----------------
 const state = new StateSchema({
   problem: z.string().default(""),
+
   solution_1: z.string().default(""),
+
   solution_2: z.string().default(""),
+
   judge: z.object({
     solution_1_score: z.number().default(0),
+
     solution_2_score: z.number().default(0),
-    Solution_1_resoning: z.string().default(""),
-    Solution_2_resoning: z.string().default("")
-  })
-})
 
-const solutionNode: GraphNode<typeof state> = async (state) => {
-  const [mistralResponse, cohereResponse] = await Promise.all([
-    mistralModel.invoke(state.problem),
-    cohereModel.invoke(state.problem),
-  ]);
-  return {
-    solution_1: mistralResponse.text,
-    solution_2: cohereResponse.text,
-  }
-}
-const judgeNode: GraphNode<typeof state> = async (state) => {
-  const { problem, solution_1, solution_2 } = state;
+    solution_1_reasoning: z.string().default(""),
 
-  const prompt = `
-You are a judge evaluating two solutions.
+    solution_2_reasoning: z.string().default(""),
+  }),
+});
 
-Return ONLY valid JSON:
-{
-  "solution_1_score": number (0-10),
-  "solution_2_score": number (0-10),
-  "solution_1_reasoning": string,
-  "solution_2_reasoning": string
-}
-
-Problem: ${problem}
-Solution 1: ${solution_1}
-Solution 2: ${solution_2}
-`;
-
-  const response = await geminiModel.invoke(prompt);
-
-  let text = "";
-
-  // handle string
-  if (typeof response.content === "string") {
-    text = response.content;
+// ---------------- HELPERS ----------------
+const extractText = (res: any) => {
+  if (typeof res.content === "string") {
+    return res.content;
   }
 
-  // handle array (ContentBlock[])
-  else if (Array.isArray(response.content)) {
-    text = response.content
+  if (Array.isArray(res.content)) {
+    return res.content
       .map((c: any) => c.text ?? "")
       .join("");
   }
 
-  const parsed = JSON.parse(text);
+  return String(res.content);
+};
+
+// ---------------- SOLUTION NODE ----------------
+const solutionNode: GraphNode<typeof state> = async (state) => {
+  const prompt = `
+${SYSTEM_PROMPT}
+
+Problem:
+${state.problem}
+`;
+
+  const [mistralResponse, cohereResponse] =
+    await Promise.all([
+      mistralModel.invoke(prompt),
+      cohereModel.invoke(prompt),
+    ]);
 
   return {
-    judge: parsed
+    solution_1: extractText(mistralResponse),
+    solution_2: extractText(cohereResponse),
   };
 };
 
+// ---------------- JUDGE NODE ----------------
+const judgeNode: GraphNode<typeof state> = async (state) => {
+  const { problem, solution_1, solution_2 } = state;
 
+  const prompt = JUDGE_PROMPT(
+    problem,
+    solution_1,
+    solution_2
+  );
+
+  const response = await geminiModel.invoke(prompt);
+
+  let text = extractText(response);
+
+  // remove markdown formatting
+  text = text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+  let parsed;
+
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    console.log("⚠️ Judge JSON parse failed:", error);
+
+    parsed = {
+      solution_1_score: 5,
+      solution_2_score: 5,
+      solution_1_reasoning: "Parsing failed",
+      solution_2_reasoning: "Parsing failed",
+    };
+  }
+
+  return {
+    judge: parsed,
+  };
+};
+
+// ---------------- GRAPH ----------------
 const graph = new StateGraph(state)
   .addNode("solutionNode", solutionNode)
   .addNode("judgeNode", judgeNode)
   .addEdge(START, "solutionNode")
   .addEdge("solutionNode", "judgeNode")
   .addEdge("judgeNode", END)
-  .compile()
+  .compile();
 
+// ---------------- RUN ----------------
+const runGraph = async (problem: string) => {
+  return await graph.invoke({
+    problem,
+  });
+};
 
-export default async function (problem: string) {
-
-  const result = await graph.invoke({
-    problem: problem
-  })
-
-  return result;
-}
+export default runGraph;
