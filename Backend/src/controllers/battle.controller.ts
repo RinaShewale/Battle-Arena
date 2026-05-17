@@ -86,3 +86,50 @@ export const getBattles = async (
     });
   }
 };
+
+
+export const judgeBattle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { winner } = req.body;
+
+    if (!id || !winner) {
+      return res.status(400).json({
+        success: false,
+        message: "Battle ID and winner required",
+      });
+    }
+
+    const battle = await Battle.findById(id);
+
+    if (!battle) {
+      return res.status(404).json({
+        success: false,
+        message: "Battle not found",
+      });
+    }
+
+    // ⭐ update winner
+    battle.winner = winner;
+
+    // optional scoring logic
+    if (winner === "A") {
+      battle.solution_1_score += 1;
+    } else {
+      battle.solution_2_score += 1;
+    }
+
+    await battle.save();
+
+    res.json({
+      success: true,
+      battle,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: "Judge failed",
+    });
+  }
+};

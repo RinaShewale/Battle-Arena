@@ -3,9 +3,9 @@ import type {
   Response,
 } from "express";
 
-import User from "../models/user.model";
+import User from "../models/user.model.js";
 
-import generateToken from "../utils/generateToken";
+import generateToken from "../utils/generateToken.js";
 
 // ================= REGISTER =================
 export const registerUser = async (
@@ -83,7 +83,7 @@ export const registerUser = async (
 
       user: {
         _id: user._id,
-        name: user.name,
+        name: user.name || "User",
         email: user.email,
       },
     });
@@ -265,6 +265,55 @@ export const logoutUser = async (
         error instanceof Error
           ? error.message
           : "Internal Server Error",
+    });
+  }
+};
+
+
+
+export const updateProfile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId =
+      (req as any).user?.id;
+
+    const { name } = req.body;
+
+    const user =
+      await User.findById(userId);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+
+      return;
+    }
+
+    user.name =
+      name || user.name;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Server Error",
     });
   }
 };

@@ -3,18 +3,23 @@ import type { Request, Response } from "express";
 
 import cors from "cors";
 import passport from "passport";
+import cookieParser from "cookie-parser";
 
 import runGraph from "../src/ai/graph.ai.js";
 
 import authRoutes from "../src/routes/auth.routes.js";
 import battleRoutes from "../src/routes/battle.routes.js";
 
-import "../src/config/passport.js"; // 🔥 IMPORTANT (register google strategy)
+import "../src/config/passport.js";
 
 const app = express();
 
 /* ---------------- MIDDLEWARE ---------------- */
+
 app.use(express.json());
+
+/* ✅ COOKIE PARSER */
+app.use(cookieParser());
 
 app.use(
   cors({
@@ -23,26 +28,33 @@ app.use(
   })
 );
 
-app.use(passport.initialize()); // 🔥 IMPORTANT
+app.use(passport.initialize());
 
 /* ---------------- HEALTH CHECK ---------------- */
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Battle Arena API Running 🚀");
 });
 
 /* ---------------- TEST AI ---------------- */
+
 app.get("/test-ai", async (req: Request, res: Response) => {
   try {
     const result = await runGraph(
       "Write a function to reverse a string in JavaScript"
     );
 
-    console.log("🔥 RESULT:", JSON.stringify(result, null, 2));
+    console.log(
+      "🔥 RESULT:",
+      JSON.stringify(result, null, 2)
+    );
 
     res.json(result);
   } catch (err) {
     const message =
-      err instanceof Error ? err.message : "Unknown error";
+      err instanceof Error
+        ? err.message
+        : "Unknown error";
 
     res.status(500).json({
       success: false,
@@ -52,7 +64,9 @@ app.get("/test-ai", async (req: Request, res: Response) => {
 });
 
 /* ---------------- ROUTES ---------------- */
+
 app.use("/api/auth", authRoutes);
+
 app.use("/api/battle", battleRoutes);
 
 export default app;

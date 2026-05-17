@@ -6,25 +6,40 @@ import {
   loginUser,
   logoutUser,
   getProfile,
+  updateProfile,
 } from "../controllers/auth.controller.js";
 
 import generateToken from "../utils/generateToken.js";
 
+import { protect } from "../middlewares/auth.middleware.js";
+
 const router = express.Router();
 
 /* ---------------- EMAIL AUTH ---------------- */
+
+// REGISTER
 router.post("/register", registerUser);
+
+// LOGIN
 router.post("/login", loginUser);
 
 /* ---------------- PROFILE ---------------- */
-router.get("/profile", getProfile);
+
+// GET PROFILE
+router.get("/profile", protect, getProfile);
 
 /* ---------------- LOGOUT ---------------- */
+
+// LOGOUT
 router.post("/logout", logoutUser);
+
+
+// UPDATE PROFILE
+router.put("/profile",protect,updateProfile);
 
 /* ---------------- GOOGLE AUTH ---------------- */
 
-// Step 1: Google Login
+// GOOGLE LOGIN
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -32,53 +47,71 @@ router.get(
   })
 );
 
-// Step 2: Google Callback
+/* ---------------- GOOGLE CALLBACK ---------------- */
+
 router.get(
   "/google/callback",
+
   passport.authenticate("google", {
-    failureRedirect: "/api/auth/google/fail",
+    failureRedirect: "http://localhost:5173/login",
+
     session: false,
   }),
+
   (req, res) => {
-    const user = req.user as any;
+    try {
+      const user = req.user as any;
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Google Auth Failed",
+      if (!user) {
+        return res.redirect(
+          "http://localhost:5173/login"
+        );
+      }
+
+      // GENERATE JWT
+      const token = generateToken(
+        user._id.toString()
+      );
+
+      // SAVE COOKIE
+      res.cookie("token", token, {
+        httpOnly: true,
+
+        secure: false,
+
+        sameSite: "lax",
+
+        maxAge:
+          7 *
+          24 *
+          60 *
+          60 *
+          1000,
       });
+
+      // REDIRECT FRONTEND
+      return res.redirect(
+        "http://localhost:5173/"
+      );
+    } catch (error) {
+      console.log(
+        "GOOGLE CALLBACK ERROR:",
+        error
+      );
+
+      return res.redirect(
+        "http://localhost:5173/login"
+      );
     }
-
-    const token = generateToken(user._id.toString());
-
-    // cookie set
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false, // true in production (HTTPS)
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    // TEMP TEST RESPONSE (no frontend needed)
-    return res.json({
-      success: true,
-      message: "Google login successful 🎉",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-      token,
-    });
   }
 );
 
-/* ---------------- FAIL ROUTE ---------------- */
+/* ---------------- GOOGLE FAIL ---------------- */
+
 router.get("/google/fail", (req, res) => {
-  res.status(401).json({
-    success: false,
-    message: "Google Authentication Failed",
-  });
+  res.redirect(
+    "http://localhost:5173/login"
+  );
 });
 
 export default router;

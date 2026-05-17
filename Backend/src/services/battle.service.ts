@@ -2,7 +2,7 @@ import {
   geminiModel,
   mistralModel,
   cohereModel,
-} from "../ai/model.ai";
+} from "../ai/model.ai.js";
 
 export type AIModelType =
   | "gemini"

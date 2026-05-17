@@ -1,25 +1,22 @@
-import type { Request, Response, NextFunction } from "express";
+import type {
+  Request,
+  Response,
+  NextFunction,
+} from "express";
+
 import jwt from "jsonwebtoken";
 
 import config from "../config/config.js";
 
-interface JwtPayload {
-  id: string;
-}
-
-export interface AuthRequest extends Request {
-  user?: JwtPayload;
-}
-
 export const protect = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies.token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!token) {
       res.status(401).json({
         success: false,
         message: "Not authorized",
@@ -28,14 +25,13 @@ export const protect = (
       return;
     }
 
-    const token = authHeader.split(" ")[1];
-
     const decoded = jwt.verify(
       token,
       config.JWT_SECRET
-    ) as JwtPayload;
+    ) as { id: string };
 
-    req.user = decoded;
+    // ✅ attach user manually
+    (req as any).user = decoded;
 
     next();
   } catch (error) {
