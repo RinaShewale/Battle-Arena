@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
   Trophy,
   Brain,
   Zap,
-  BarChart3,
   RefreshCw,
 } from "lucide-react";
 
@@ -14,6 +13,7 @@ import { Footer } from "../component/Footer";
 import { BackgroundSystem } from "../component/UI/BackgroundSystem";
 import { getBattlesAPI } from "../../services/battle.api";
 
+// ... (Rest same)
 type Battle = {
   _id: string;
   solution_1_score: number;
@@ -95,7 +95,6 @@ export const LeaderboardPage = () => {
       <Navbar />
 
       <main className="relative z-10 pt-32 pb-24 px-6 max-w-6xl mx-auto">
-        {/* SIMPLE HEADER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
           <div>
             <div className="flex items-center gap-2 text-emerald-500 mb-2">
@@ -109,7 +108,6 @@ export const LeaderboardPage = () => {
           </div>
         </header>
 
-        {/* CHAMPION HERO - Simple & Clean */}
         {topModel && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -137,7 +135,6 @@ export const LeaderboardPage = () => {
           </motion.div>
         )}
 
-        {/* TABLE HEADINGS - Desktop Only */}
         <div className="hidden md:grid grid-cols-12 px-8 py-4 text-zinc-500 text-[10px] uppercase tracking-[0.3em] font-bold border-b border-white/5">
           <div className="col-span-1">Rank</div>
           <div className="col-span-5">Model</div>
@@ -146,7 +143,6 @@ export const LeaderboardPage = () => {
           <div className="col-span-2 text-right">Latest Score</div>
         </div>
 
-        {/* LIST */}
         <div className="mt-4 space-y-2">
           {loading ? (
             <div className="flex justify-center py-20">
@@ -161,10 +157,7 @@ export const LeaderboardPage = () => {
                 transition={{ delay: index * 0.05 }}
                 className="grid grid-cols-1 md:grid-cols-12 items-center p-6 md:px-8 md:py-6 rounded-2xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-colors"
               >
-                {/* Rank */}
                 <div className="hidden md:block col-span-1 font-mono text-zinc-500">{model.rank}</div>
-
-                {/* Name & Info */}
                 <div className="col-span-1 md:col-span-5 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400">
                     <Zap size={18} />
@@ -175,8 +168,6 @@ export const LeaderboardPage = () => {
                     <div className="hidden md:block text-[9px] text-zinc-500 uppercase tracking-widest mt-0.5">{model.category}</div>
                   </div>
                 </div>
-
-                {/* Stats Row */}
                 <div className="grid grid-cols-3 md:contents mt-6 pt-6 border-t border-white/5 md:mt-0 md:pt-0 md:border-0">
                   <div className="md:col-span-2 text-left md:text-center">
                     <span className="md:hidden block text-[9px] text-zinc-600 uppercase mb-1">Wins</span>

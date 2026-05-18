@@ -1,7 +1,7 @@
-import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 
 export const Footer = () => {
+  // ... rest of code same
   const footerLinks = {
     Platform: ['Benchmarks', 'Neural Arena', 'Pricing', 'Documentation'],
     Science: ['Research', 'Whitepaper', 'Safety', 'Changelog'],
@@ -10,13 +10,10 @@ export const Footer = () => {
 
   return (
     <footer className="relative z-10 bg-[#050505] border-t border-white/5 pt-32 pb-12 px-6 overflow-hidden">
-      {/* Subtle Background Detail */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
-          
-          {/* Brand Identity Section */}
           <div className="lg:col-span-5 space-y-10">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
@@ -32,7 +29,6 @@ export const Footer = () => {
             </div>
           </div>
 
-          {/* Dynamic Link Columns */}
           <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-12">
             {Object.entries(footerLinks).map(([title, links]) => (
               <div key={title}>
@@ -56,7 +52,6 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Utility Bar */}
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-end gap-8">
           <div className="space-y-2">
             <p className="text-white/20 text-[10px] uppercase tracking-[0.5em]">
@@ -68,7 +63,6 @@ export const Footer = () => {
             </div>
           </div>
 
-          {/* Social Icons - Minimalist Style */}
           <div className="flex items-center gap-3">
             <SocialIcon icon="GH" />
             <SocialIcon icon="TW" />

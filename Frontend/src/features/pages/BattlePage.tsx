@@ -7,15 +7,14 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
   Plus, Brain, Scale, Trophy,
   Copy, Sparkles, User, Check, Terminal, ChevronDown,
-  Zap, Cpu, Settings2, Globe, Menu, X, Trash2, Edit3,
-  LogOut, Settings, Search, MessageSquare
+  Zap, Cpu, Settings2, Globe, Menu,
+  LogOut, Settings, Search
 } from "lucide-react";
 
 import {
   useBattleContext,
   getBattleTurns,
   getBattleTitle,
-  type Battle,
   type BattleTurn,
 } from "../BattleContext";
 import { BattleSidebarItem } from "../component/BattleSidebarItem";
@@ -191,7 +190,7 @@ const SolutionCard = ({
 // --- Main Page ---
 const BattlePage: React.FC = () => {
   const {
-    battles, loading, createBattle, appendBattleMessage,
+    battles, createBattle, appendBattleMessage,
     judgeBattle, renameBattle, deleteBattle
   } = useBattleContext();
   const { user, logout } = useAuth();

@@ -1,8 +1,7 @@
-import React, { useLayoutEffect, useRef, useEffect } from "react";
-import { motion } from 'framer-motion';
+import { useLayoutEffect, useRef, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { 
-  MessageSquare, EyeOff, BarChart3, Cpu, Search, 
+  EyeOff, BarChart3, Cpu, Search, 
   ArrowRight, Shield, Zap, Globe, Layers, Database 
 } from 'lucide-react';
 import { gsap } from "gsap";
@@ -15,6 +14,7 @@ import { BackgroundSystem } from "../component/UI/BackgroundSystem";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ... (rest same)
 const HowItWorksPage: React.FC = () => {
   const mainRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -31,7 +31,6 @@ const HowItWorksPage: React.FC = () => {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Hero Entrance
       gsap.from(".reveal-item", {
         y: 60,
         opacity: 0,
@@ -40,7 +39,6 @@ const HowItWorksPage: React.FC = () => {
         ease: "power4.out",
       });
 
-      // Stats Stagger
       gsap.from(".stat-item", {
         scrollTrigger: {
           trigger: ".stats-section",
@@ -53,7 +51,6 @@ const HowItWorksPage: React.FC = () => {
         ease: "power3.out"
       });
 
-      // Global Scroll Reveals
       gsap.utils.toArray<HTMLElement>(".step-reveal").forEach((elem) => {
         gsap.from(elem, {
           scrollTrigger: {
@@ -76,7 +73,6 @@ const HowItWorksPage: React.FC = () => {
       <Navbar />
 
       <main className="relative z-10 pt-32">
-        {/* HERO SECTION */}
         <section className="px-6 py-24 max-w-7xl mx-auto min-h-[80vh] flex flex-col justify-center">
           <div className="reveal-item">
             <span className="inline-block px-3 py-1 border border-white/10 bg-white/5 text-[9px] font-mono text-zinc-500 uppercase tracking-[0.4em] mb-8">
@@ -92,7 +88,6 @@ const HowItWorksPage: React.FC = () => {
             Stripping away marketing to reveal raw computational truth.
           </p>
 
-          {/* QUICK STATS */}
           <div className="stats-section mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/5 pt-12">
             <StatItem label="Daily Battles" value="142,000+" />
             <StatItem label="Models Evaluated" value="85" />
@@ -101,40 +96,33 @@ const HowItWorksPage: React.FC = () => {
           </div>
         </section>
 
-        {/* PROCESS STEPS */}
         <section className="py-20 px-6 max-w-6xl mx-auto space-y-72">
-          
           <ProcessStep 
             num="01" icon={<EyeOff size={22}/>} title="Double-Blind Duals"
             desc="The most dangerous bias is a brand name. We strip all metadata and identifiers. You judge the logic, the tone, and the accuracy—not the logo."
             img="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2000"
             align="left"
           />
-
           <ProcessStep 
             num="02" icon={<Shield size={22}/>} title="Hallucination Shield"
             desc="Every winning response is cross-checked against our neural-guard. We flag logical loops and factual errors that human eyes might miss."
             img="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000"
             align="right"
           />
-
           <ProcessStep 
             num="03" icon={<BarChart3 size={22}/>} title="The ELO Engine"
             desc="Based on the Glicko-2 ranking system used in Grandmaster Chess. AIs gain prestige by defeating stronger opponents, creating a fluid, merit-based leaderboard."
             img="https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=2000"
             align="left"
           />
-
           <ProcessStep 
             num="04" icon={<Globe size={22}/>} title="Global Consensus"
             desc="Wisdom of the crowd meets expert verification. Thousands of daily interactions converge to define what 'better' actually means for humanity."
             img="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000"
             align="right"
           />
-
         </section>
 
-        {/* TECHNICAL SPECIFICATIONS (BENTO) */}
         <section className="py-40 px-6 max-w-7xl mx-auto">
           <div className="mb-20">
              <h2 className="text-4xl font-light mb-4">Laboratory Infrastructure</h2>
@@ -166,7 +154,6 @@ const HowItWorksPage: React.FC = () => {
           </div>
         </section>
 
-        {/* CTA SECTION */}
         <section className="py-60 text-center relative border-t border-white/5 bg-zinc-900/10">
           <h2 className="text-6xl md:text-9xl font-extralight tracking-tighter mb-16 relative z-10">
             Witness the <br /> <span className="italic font-serif text-zinc-500 text-5xl md:text-8xl">Evolution.</span>
@@ -194,8 +181,6 @@ const HowItWorksPage: React.FC = () => {
     </div>
   );
 };
-
-/* --- SUB-COMPONENTS --- */
 
 const StatItem = ({ label, value }: { label: string, value: string }) => (
   <div className="stat-item">

@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Paperclip, Image as ImageIcon, Globe, Mic, ArrowUp, X, Upload, Search, Loader2, FileCode } from "lucide-react";
 import { webSearchAPI } from "../../services/battle.api";
-import type { SelectedFile, SelectedImage, ToolPopup } from "../../types/battleMessage";
+import type { ToolPopup } from "../../types/battleMessage";
 
+// ... (Rest of the component logic remains the same)
 const getSpeechRecognition = (): any => {
   const win = window as any;
   return win.SpeechRecognition || win.webkitSpeechRecognition || null;
 };
 
-// Helper for Tailwind dynamic colors
 const colorMap = {
   purple: { bg: "bg-purple-500/10", border: "border-purple-500/20", text: "text-purple-400", icon: "text-purple-300" },
   blue: { bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-blue-400", icon: "text-blue-300" },
@@ -49,6 +49,27 @@ export const BattleInputToolbar = ({
     rec.onend = () => setIsListening(false);
     rec.start();
   };
+
+  async function handleWebSearch() {
+    setIsSearching(true);
+    const res = await webSearchAPI(webQuery, true);
+    if (res?.success) setWebSearchResult(res.result);
+    setIsSearching(false);
+    setActivePopup(null);
+  }
+
+  async function handleUpload(e: any, type: 'file' | 'image') {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (type === 'file') {
+      setSelectedFile({ name: file.name, content: await file.text() });
+    } else {
+      const rd = new FileReader();
+      rd.onload = () => setSelectedImage({ name: file.name, dataUrl: rd.result as string });
+      rd.readAsDataURL(file);
+    }
+    setActivePopup(null);
+  }
 
   return (
     <div ref={toolbarRef} className="relative w-full max-w-4xl mx-auto px-2 sm:px-4 pb-4">
@@ -102,7 +123,6 @@ export const BattleInputToolbar = ({
       </AnimatePresence>
 
       <div className="bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] sm:rounded-[2.5rem] p-1.5 sm:p-2 shadow-2xl transition-all focus-within:border-purple-500/30">
-        {/* Attachment Chips */}
         {(selectedFile || selectedImage || webSearchResult) && (
           <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
             {selectedFile && <Chip icon={FileCode} label={selectedFile.name} color="purple" onClear={() => setSelectedFile(null)} />}
@@ -112,7 +132,6 @@ export const BattleInputToolbar = ({
         )}
 
         <div className="flex items-end gap-1">
-          {/* Action Tools - Hidden on very small screens, or slightly smaller padding */}
           <div className="flex items-center">
             <ToolIcon icon={Paperclip} onClick={() => setActivePopup(activePopup === 'file' ? null : 'file')} active={activePopup === 'file'} />
             <ToolIcon icon={ImageIcon} onClick={() => setActivePopup(activePopup === 'image' ? null : 'image')} active={activePopup === 'image'} />
@@ -151,28 +170,6 @@ export const BattleInputToolbar = ({
       <input type="file" ref={imageInputRef} className="hidden" accept="image/*" onChange={e => handleUpload(e, 'image')} />
     </div>
   );
-
-  // ... (handleWebSearch and handleUpload logic remains the same)
-  async function handleWebSearch() {
-    setIsSearching(true);
-    const res = await webSearchAPI(webQuery, true);
-    if (res?.success) setWebSearchResult(res.result);
-    setIsSearching(false);
-    setActivePopup(null);
-  }
-
-  async function handleUpload(e: any, type: 'file' | 'image') {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (type === 'file') {
-      setSelectedFile({ name: file.name, content: await file.text() });
-    } else {
-      const rd = new FileReader();
-      rd.onload = () => setSelectedImage({ name: file.name, dataUrl: rd.result as string });
-      rd.readAsDataURL(file);
-    }
-    setActivePopup(null);
-  }
 };
 
 const ToolIcon = ({ icon: Icon, onClick, active }: any) => (

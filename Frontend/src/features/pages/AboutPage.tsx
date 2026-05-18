@@ -1,9 +1,7 @@
-import React, { useLayoutEffect, useRef } from "react";
-import { motion } from 'framer-motion';
+import { useLayoutEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { 
-  Shield, Zap, Activity, Users, Award, 
-  MoveRight, Fingerprint, Microscope, Scale 
+  Shield, MoveRight, Fingerprint, Microscope, Scale 
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -14,13 +12,13 @@ import { BackgroundSystem } from '../component/UI/BackgroundSystem';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ... (Rest of component same)
 const AboutPage = () => {
   const mainRef = useRef(null);
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Staggered text reveals
       gsap.from(".reveal-item", {
         y: 40,
         opacity: 0,
@@ -29,7 +27,6 @@ const AboutPage = () => {
         ease: "power3.out"
       });
 
-      // Scale up image on scroll
       gsap.from(".hero-image", {
         scrollTrigger: {
           trigger: ".hero-image",
@@ -50,8 +47,6 @@ const AboutPage = () => {
       <Navbar />
 
       <main className="relative z-10 pt-48">
-        
-        {/* SECTION 1: MANIFESTO HERO */}
         <section className="px-6 max-w-7xl mx-auto mb-60">
           <div className="grid lg:grid-cols-12 gap-12 items-start">
             <div className="lg:col-span-8">
@@ -81,7 +76,6 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* SECTION 2: THE LARGE VISUAL */}
         <section className="px-6 mb-60">
             <div className="max-w-7xl mx-auto h-[600px] rounded-[3rem] overflow-hidden border border-white/5 relative group">
                 <img 
@@ -97,7 +91,6 @@ const AboutPage = () => {
             </div>
         </section>
 
-        {/* SECTION 3: THE THREE PILLARS (BENTO) */}
         <section className="px-6 max-w-7xl mx-auto mb-60">
             <div className="grid md:grid-cols-3 gap-6">
                 <PillarCard 
@@ -118,7 +111,6 @@ const AboutPage = () => {
             </div>
         </section>
 
-        {/* SECTION 4: THE NEUTRALITY CLAUSE */}
         <section className="py-40 px-6 bg-zinc-900/20 border-y border-white/5 relative overflow-hidden">
             <div className="max-w-4xl mx-auto text-center relative z-10">
                 <Shield className="w-16 h-16 text-zinc-700 mx-auto mb-10" strokeWidth={1} />
@@ -129,13 +121,11 @@ const AboutPage = () => {
                 </p>
                 <div className="mt-12 h-px w-20 bg-zinc-800 mx-auto" />
             </div>
-            {/* Background decorative text */}
             <div className="absolute top-1/2 left-0 -translate-y-1/2 text-[20vw] font-bold text-white/[0.02] select-none pointer-events-none whitespace-nowrap">
                 UNBIASED DATA UNBIASED DATA
             </div>
         </section>
 
-        {/* SECTION 5: FINAL CTA */}
         <section className="py-60 px-6 text-center">
             <h3 className="text-5xl md:text-7xl font-extralight tracking-tighter mb-12">Join the Research.</h3>
             <button 
@@ -153,8 +143,6 @@ const AboutPage = () => {
     </div>
   );
 };
-
-/* --- SUB-COMPONENTS --- */
 
 const StatBlock = ({ label, value }: { label: string, value: string }) => (
     <div>

@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical, Pencil, Trash2, MessageSquare } from "lucide-react";
+import { MoreVertical, Trash2, MessageSquare } from "lucide-react";
 import { getBattleTitle, type Battle } from "../BattleContext";
 
+// ... (Rest of code exactly the same, Pencil was just an extra import line)
 interface Props {
   battle: Battle;
   isActive: boolean;
-  isMenuOpen: boolean;      // Added
-  onMenuToggle: () => void; // Added
-  onMenuClose: () => void;  // Added
+  isMenuOpen: boolean;
+  onMenuToggle: () => void;
+  onMenuClose: () => void;
   onSelect: () => void;
   onRename: (id: string, title: string) => Promise<any>;
   onDelete: (id: string) => Promise<any>;
@@ -30,12 +31,10 @@ export const BattleSidebarItem = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync value with battle title
   useEffect(() => {
     setValue(getBattleTitle(battle));
   }, [battle]);
 
-  // Focus input when renaming
   useEffect(() => {
     if (renaming) {
       inputRef.current?.focus();
@@ -104,7 +103,6 @@ export const BattleSidebarItem = ({
             <AnimatePresence>
               {isMenuOpen && (
                 <>
-                  {/* Backdrop to close menu when clicking anywhere else */}
                   <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); onMenuClose(); }} />
 
                   <motion.div
@@ -144,7 +142,6 @@ export const BattleSidebarItem = ({
   );
 };
 
-// Internal icon import fix
 const Edit3 = ({ size, className }: { size: number, className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
 );

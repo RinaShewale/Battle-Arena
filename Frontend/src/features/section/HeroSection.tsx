@@ -1,41 +1,33 @@
 import { motion } from "framer-motion";
-import { MoveRight, Zap, Brain, MessageSquare, Sparkles } from "lucide-react";
+import { MoveRight, Brain, MessageSquare, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { HeroScene } from "./HeroScene";
 import { BackgroundSystem } from "../component/UI/BackgroundSystem";
 import { useEffect, useState } from "react";
 import { getBattlesAPI } from "../../services/battle.api";
 
+// ... rest of component same
 export const HeroSection = () => {
   const navigate = useNavigate();
-
-  // 🔥 ONLY ONE LATEST BATTLE
   const [latestBattle, setLatestBattle] = useState<any | null>(null);
 
-  // 🔥 FETCH LATEST BATTLE
   useEffect(() => {
     const fetchBattle = async () => {
       try {
         const res = await getBattlesAPI();
-
         const latest = (res?.battles || [])
           .sort(
             (a: any, b: any) =>
               new Date(b.createdAt).getTime() -
               new Date(a.createdAt).getTime()
-          )[0]; // 👈 ONLY ONE
-
+          )[0]; 
         setLatestBattle(latest || null);
       } catch (err) {
         console.log("Live feed error:", err);
       }
     };
-
     fetchBattle();
-
-    // 🔥 LIVE UPDATE
     const interval = setInterval(fetchBattle, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -50,15 +42,10 @@ export const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center bg-[#050505] text-white overflow-hidden">
       <BackgroundSystem />
-
       <HeroScene />
-
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(59,130,246,0.05)_0%,transparent_50%)] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/20 to-[#050505]" />
-
       <div className="max-w-7xl mx-auto w-full px-6 grid lg:grid-cols-12 gap-16 relative z-20 pt-20">
-
-        {/* LEFT SIDE */}
         <div className="lg:col-span-7 flex flex-col justify-center">
           <motion.div className="flex items-center gap-3 mb-8">
             <div className="px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10">
@@ -67,18 +54,15 @@ export const HeroSection = () => {
               </span>
             </div>
           </motion.div>
-
           <h1 className="text-6xl md:text-[110px] font-extralight leading-[0.85] tracking-tighter mb-10">
             Find the AI <br />
             <span className="font-serif italic text-white/30">
               that fits you.
             </span>
           </h1>
-
           <p className="text-white/50 text-lg md:text-xl max-w-lg mb-12 font-light leading-relaxed">
             Stop guessing which AI is better. We test them side-by-side.
           </p>
-
           <div className="flex flex-wrap gap-5">
             <button
               onClick={() => navigate("/battlearena")}
@@ -86,7 +70,6 @@ export const HeroSection = () => {
             >
               Start Your Test <MoveRight size={18} />
             </button>
-
             <button
               onClick={() => navigate("/working")}
               className="h-16 px-8 border border-white/10 rounded-full text-white/70 hover:bg-white/5"
@@ -95,11 +78,7 @@ export const HeroSection = () => {
             </button>
           </div>
         </div>
-
-        {/* RIGHT SIDE */}
         <div className="lg:col-span-5 hidden lg:flex flex-col gap-6 justify-center">
-
-          {/* STATS */}
           <div className="grid grid-cols-2 gap-4">
             <MetricCard
               icon={<Brain size={20} className="text-blue-400" />}
@@ -112,25 +91,19 @@ export const HeroSection = () => {
               value="89.4k"
             />
           </div>
-
-          {/* 🔥 SINGLE LIVE FEED */}
           <div className="p-8 bg-white/[0.03] border border-white/10 rounded-[2.5rem] relative overflow-hidden">
-
             <div className="flex justify-between items-center mb-6">
               <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
                 Live Activity Feed
               </span>
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
-
-            {/* ONLY ONE ITEM */}
             <div className="space-y-4">
               {!latestBattle && (
                 <p className="text-white/30 text-xs">
                   Loading latest battle...
                 </p>
               )}
-
               {latestBattle && (
                 <BattleLogItem
                   AI1="Mistral"
@@ -144,7 +117,6 @@ export const HeroSection = () => {
                 />
               )}
             </div>
-
             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full" />
           </div>
         </div>
@@ -152,8 +124,6 @@ export const HeroSection = () => {
     </section>
   );
 };
-
-/* ---------- COMPONENTS ---------- */
 
 const MetricCard = ({ icon, label, value }: any) => (
   <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[2rem]">
@@ -173,7 +143,6 @@ const BattleLogItem = ({ AI1, AI2, status, winner = false }: any) => (
         {status}
       </span>
     </div>
-
     <div className="h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
       <motion.div
         initial={{ x: "-100%" }}
