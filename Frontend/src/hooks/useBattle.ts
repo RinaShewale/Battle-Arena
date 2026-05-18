@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { createBattleAPI, getBattlesAPI } from "../services/battle.api";
+import {
+  appendBattleMessageAPI,
+  createBattleAPI,
+  deleteBattleAPI,
+  getBattlesAPI,
+  renameBattleAPI,
+} from "../services/battle.api";
+import type { BattleMessagePayload } from "../types/battleMessage";
 
 export const useBattle = () => {
   const [battles, setBattles] = useState<any[]>([]);
@@ -21,18 +28,70 @@ export const useBattle = () => {
     loadBattles();
   }, []);
 
-  const createBattle = async (problem: string) => {
+  const createBattle = async (payload: BattleMessagePayload) => {
     try {
       setLoading(true);
-      const res = await createBattleAPI(problem);
+      const res = await createBattleAPI(payload);
 
       setBattles((prev) => [res.battle, ...prev]);
 
       return res;
     } catch (err) {
       console.log("CREATE ERROR", err);
+      throw err;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const appendBattleMessage = async (
+    battleId: string,
+    payload: BattleMessagePayload
+  ) => {
+    try {
+      setLoading(true);
+      const res = await appendBattleMessageAPI(battleId, payload);
+
+      if (res?.success && res.battle) {
+        setBattles((prev) =>
+          prev.map((b) => (b._id === battleId ? res.battle : b))
+        );
+      }
+
+      return res;
+    } catch (err) {
+      console.log("APPEND ERROR", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renameBattle = async (battleId: string, title: string) => {
+    try {
+      const res = await renameBattleAPI(battleId, title);
+      if (res?.success && res.battle) {
+        setBattles((prev) =>
+          prev.map((b) => (b._id === battleId ? res.battle : b))
+        );
+      }
+      return res;
+    } catch (err) {
+      console.log("RENAME ERROR", err);
+      throw err;
+    }
+  };
+
+  const deleteBattle = async (battleId: string) => {
+    try {
+      const res = await deleteBattleAPI(battleId);
+      if (res?.success) {
+        setBattles((prev) => prev.filter((b) => b._id !== battleId));
+      }
+      return res;
+    } catch (err) {
+      console.log("DELETE ERROR", err);
+      throw err;
     }
   };
 
@@ -40,6 +99,9 @@ export const useBattle = () => {
     battles,
     loading,
     createBattle,
+    appendBattleMessage,
+    renameBattle,
+    deleteBattle,
     refresh: loadBattles,
   };
 };

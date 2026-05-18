@@ -1,11 +1,5 @@
-import type {
-  Request,
-  Response,
-  NextFunction,
-} from "express";
-
+import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-
 import config from "../config/config.js";
 
 export const protect = (
@@ -14,23 +8,20 @@ export const protect = (
   next: NextFunction
 ): void => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies?.token;
 
     if (!token) {
       res.status(401).json({
         success: false,
         message: "Not authorized",
       });
-
       return;
     }
 
-    const decoded = jwt.verify(
-      token,
-      config.JWT_SECRET
-    ) as { id: string };
+    const decoded = jwt.verify(token, config.JWT_SECRET) as {
+      id: string;
+    };
 
-    // ✅ attach user manually
     (req as any).user = decoded;
 
     next();

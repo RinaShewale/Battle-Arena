@@ -1,17 +1,32 @@
 import express from "express";
 
+import { protect } from "../middlewares/auth.middleware.js";
+
 import {
+  appendBattleMessage,
   createBattle,
+  deleteBattle,
   getBattles,
   judgeBattle,
+  renameBattle,
+  webSearch,
 } from "../controllers/battle.controller.js";
 
 const router = express.Router();
 
-router.post("/", createBattle);
+/* 🔐 All routes protected */
+router.post("/", protect, createBattle);
 
-router.get("/", getBattles);
+router.post("/web-search", protect, webSearch);
 
-router.post("/judge/:id", judgeBattle);
+router.get("/", protect, getBattles);
+
+router.post("/judge/:id", protect, judgeBattle);
+
+router.post("/:id/message", protect, appendBattleMessage);
+
+router.patch("/:id", protect, renameBattle);
+
+router.delete("/:id", protect, deleteBattle);
 
 export default router;

@@ -16,11 +16,13 @@ import { Navbar } from "../component/Navbar";
 import { Footer } from "../component/Footer";
 import { HeroSection } from "../section/HeroSection"; // This includes HeroScene
 import { BackgroundSystem } from "../component/UI/BackgroundSystem";
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const HomePage: React.FC = () => {
   const mainRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // 1. Initialize Smooth Scroll (Lenis)
@@ -183,10 +185,10 @@ const HomePage: React.FC = () => {
             </h2>
             
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <button className="h-20 px-16 bg-white text-black rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.1)]">
+              <button onClick={()=> navigate("/battlearena")} className="h-20 px-16 bg-white text-black rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.1)]">
                 Enter the Arena
               </button>
-              <button className="h-20 px-16 border border-white/10 rounded-full font-medium text-xl hover:bg-white/5 transition-colors">
+              <button onClick={() => navigate("/about")} className="h-20 px-16 border border-white/10 rounded-full font-medium text-xl hover:bg-white/5 transition-colors">
                 View Methodology
               </button>
             </div>

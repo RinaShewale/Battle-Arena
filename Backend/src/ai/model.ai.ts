@@ -12,12 +12,12 @@ export const geminiModel = new ChatGoogleGenerativeAI({
     // 🔥 IMPORTANT: prevent schema injection issues
     safetySettings: [],
 })
-export const mistralModel= new ChatMistralAI({
+export const mistralModel = new ChatMistralAI({
     model: "mistral-medium-latest",
     apiKey: config.MISTRAL_API_KEY
 })
 
-export const cohereModel= new ChatCohere({
+export const cohereModel = new ChatCohere({
     model: "command-a-03-2025",
     apiKey: config.COHERE_API_KEY
 })

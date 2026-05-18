@@ -1,106 +1,170 @@
-import type {
-  Request,
-  Response,
-} from "express";
+import type { Request, Response } from "express";
 
-import runGraph from "../ai/graph.ai";
-import Battle from "../models/battle.model";
+import runGraph from "../ai/graph.ai.js";
+import { generateBattleTitle } from "../ai/title.ai.js";
+import { describeImage } from "../ai/vision.ai.js";
+import Battle from "../models/battle.model.js";
 
-export const createBattle = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+import {
+  buildConversationContext,
+  createTurnFromGraphResult,
+  enrichMessage,
+  syncBattleLatestFields,
+  type MessageAttachments,
+} from "../services/battle.service.js";
+
+/* ---------------- USER HELPER ---------------- */
+const getUserId = (req: Request): string => {
+  return (req as any).user?.id;
+};
+
+/* ---------------- ATTACHMENTS ---------------- */
+const parseAttachments = async (
+  body: Record<string, unknown>
+): Promise<MessageAttachments | undefined> => {
+  const attachments: MessageAttachments = {};
+
+  if (typeof body.fileName === "string" && body.fileName.trim()) {
+    attachments.fileName = body.fileName;
+  }
+
+  if (typeof body.fileContent === "string" && body.fileContent.trim()) {
+    attachments.fileContent = body.fileContent;
+  }
+
+  if (typeof body.imageName === "string" && body.imageName.trim()) {
+    attachments.imageName = body.imageName;
+  }
+
+  if (typeof body.imageDataUrl === "string" && body.imageDataUrl.trim()) {
+    attachments.imageDataUrl = body.imageDataUrl;
+
+    attachments.imageDescription = await describeImage(
+      body.imageDataUrl,
+      attachments.imageName ?? "image"
+    );
+  }
+
+  if (typeof body.webSearchResult === "string" && body.webSearchResult.trim()) {
+    attachments.webSearchResult = body.webSearchResult;
+  }
+
+  return Object.keys(attachments).length ? attachments : undefined;
+};
+
+/* ---------------- MESSAGE ---------------- */
+const getRawMessage = (body: Record<string, unknown>): string => {
+  const message =
+    typeof body.message === "string"
+      ? body.message
+      : typeof body.problem === "string"
+      ? body.problem
+      : "";
+
+  return message.trim();
+};
+
+/* ---------------- CREATE BATTLE ---------------- */
+export const createBattle = async (req: Request, res: Response) => {
   try {
-    const { problem } = req.body;
+    const userId = getUserId(req);
 
-    if (!problem) {
-      res.status(400).json({
+    const rawMessage = getRawMessage(req.body);
+    if (!rawMessage) {
+      return res.status(400).json({
         success: false,
-        message: "Problem required",
+        message: "Message required",
       });
-
-      return;
     }
 
-    const result = await runGraph(problem);
+    const attachments = await parseAttachments(req.body);
+    const enrichedProblem = enrichMessage(rawMessage, attachments);
 
-    const winner =
-      result.judge.solution_1_score >
-      result.judge.solution_2_score
-        ? "Mistral"
-        : "Cohere";
+    const result = await runGraph(enrichedProblem);
+    const turn = createTurnFromGraphResult(rawMessage, result);
+
+    const title = await generateBattleTitle(rawMessage);
 
     const battle = await Battle.create({
-      problem,
-
-      solution_1: result.solution_1,
-
-      solution_2: result.solution_2,
-
-      solution_1_score:
-        result.judge.solution_1_score,
-
-      solution_2_score:
-        result.judge.solution_2_score,
-
-      solution_1_reasoning:
-        result.judge.solution_1_reasoning,
-
-      solution_2_reasoning:
-        result.judge.solution_2_reasoning,
-
-      winner,
+      userId,
+      title,
+      problem: rawMessage,
+      turns: [
+        {
+          message: rawMessage,
+          solution_1: turn.solution_1,
+          solution_2: turn.solution_2,
+          solution_1_score: turn.solution_1_score ?? 0,
+          solution_2_score: turn.solution_2_score ?? 0,
+          solution_1_reasoning: turn.solution_1_reasoning,
+          solution_2_reasoning: turn.solution_2_reasoning,
+        },
+      ],
+      solution_1: turn.solution_1,
+      solution_2: turn.solution_2,
+      solution_1_score: turn.solution_1_score ?? 0,
+      solution_2_score: turn.solution_2_score ?? 0,
+      solution_1_reasoning: turn.solution_1_reasoning,
+      solution_2_reasoning: turn.solution_2_reasoning,
+      winner:
+        turn.solution_1_score > turn.solution_2_score
+          ? "Mistral"
+          : turn.solution_2_score > turn.solution_1_score
+          ? "Cohere"
+          : "Tie",
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       battle,
     });
   } catch (error) {
-    console.log(error);
-
-    res.status(500).json({
+    console.log("CREATE ERROR:", error);
+    return res.status(500).json({
       success: false,
       message: "Battle failed",
     });
   }
 };
 
-export const getBattles = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+/* ---------------- GET BATTLES ---------------- */
+export const getBattles = async (req: Request, res: Response) => {
   try {
-    const battles = await Battle.find().sort({
+    const userId = getUserId(req);
+
+    const battles = await Battle.find({ userId }).sort({
       createdAt: -1,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       battles,
     });
   } catch (error) {
-    res.status(500).json({
+    console.log("GET ERROR:", error);
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
   }
 };
 
-
-export const judgeBattle = async (req: Request, res: Response) => {
+/* ---------------- APPEND MESSAGE ---------------- */
+export const appendBattleMessage = async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
     const { id } = req.params;
-    const { winner } = req.body;
 
-    if (!id || !winner) {
+    const rawMessage = getRawMessage(req.body);
+
+    if (!id || !rawMessage) {
       return res.status(400).json({
         success: false,
-        message: "Battle ID and winner required",
+        message: "Battle ID and message required",
       });
     }
 
-    const battle = await Battle.findById(id);
+    const battle = await Battle.findOne({ _id: id, userId });
 
     if (!battle) {
       return res.status(404).json({
@@ -109,27 +173,150 @@ export const judgeBattle = async (req: Request, res: Response) => {
       });
     }
 
-    // ⭐ update winner
-    battle.winner = winner;
+    const attachments = await parseAttachments(req.body);
+    const enrichedMessage = enrichMessage(rawMessage, attachments);
+    const context = buildConversationContext(battle, enrichedMessage);
 
-    // optional scoring logic
-    if (winner === "A") {
-      battle.solution_1_score += 1;
-    } else {
-      battle.solution_2_score += 1;
-    }
+    const result = await runGraph(context);
+    const turn = createTurnFromGraphResult(rawMessage, result);
+
+    battle.turns = battle.turns || [];
+
+    battle.turns.push(turn);
+
+    syncBattleLatestFields(battle, turn);
+
+    battle.winner = "";
 
     await battle.save();
 
-    res.json({
+    return res.status(200).json({
       success: true,
       battle,
     });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
+  } catch (error) {
+    console.log("APPEND ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to append message",
+    });
+  }
+};
+
+/* ---------------- RENAME BATTLE (FIXED) ---------------- */
+export const renameBattle = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    const { id } = req.params;
+    const { title } = req.body;
+
+    if (!title?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Title required",
+      });
+    }
+
+    const battle = await Battle.findOne({ _id: id, userId });
+
+    if (!battle) {
+      return res.status(404).json({
+        success: false,
+        message: "Battle not found",
+      });
+    }
+
+    battle.title = title.trim();
+    await battle.save();
+
+    return res.status(200).json({
+      success: true,
+      battle,
+    });
+  } catch (error) {
+    console.log("RENAME ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Rename failed",
+    });
+  }
+};
+
+/* ---------------- DELETE BATTLE (FIXED) ---------------- */
+export const deleteBattle = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    const { id } = req.params;
+
+    const battle = await Battle.findOneAndDelete({
+      _id: id,
+      userId,
+    });
+
+    if (!battle) {
+      return res.status(404).json({
+        success: false,
+        message: "Battle not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Battle deleted successfully",
+    });
+  } catch (error) {
+    console.log("DELETE ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Delete failed",
+    });
+  }
+};
+
+/* ---------------- JUDGE BATTLE ---------------- */
+export const judgeBattle = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    const { id } = req.params;
+    const { winner } = req.body;
+
+    const battle = await Battle.findOne({ _id: id, userId });
+
+    if (!battle) {
+      return res.status(404).json({
+        success: false,
+        message: "Battle not found",
+      });
+    }
+
+    battle.winner = winner === "A" ? "Mistral" : "Cohere";
+
+    await battle.save();
+
+    return res.status(200).json({
+      success: true,
+      battle,
+    });
+  } catch (error) {
+    console.log("JUDGE ERROR:", error);
+    return res.status(500).json({
       success: false,
       message: "Judge failed",
+    });
+  }
+};
+
+/* ---------------- WEB SEARCH (placeholder safe) ---------------- */
+export const webSearch = async (req: Request, res: Response) => {
+  try {
+    return res.status(200).json({
+      success: true,
+      message: "Web search endpoint working",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Web search failed",
     });
   }
 };

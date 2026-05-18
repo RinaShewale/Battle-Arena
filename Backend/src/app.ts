@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import cors from "cors";
 import passport from "passport";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 
 import runGraph from "../src/ai/graph.ai.js";
 
@@ -16,7 +17,11 @@ const app = express();
 
 /* ---------------- MIDDLEWARE ---------------- */
 
-app.use(express.json());
+app.use(morgan("dev"));
+
+app.use(express.json({ limit: "15mb" }));
+
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 /* ✅ COOKIE PARSER */
 app.use(cookieParser());

@@ -11,16 +11,18 @@ import HowItWorksPage from "../features/pages/HowItWorksPage";
 import ProfilePage from "../features/pages/ProfilePage";
 
 
+
+// router.tsx (or wherever your router is defined)
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
   },
-   {
+  {
     path: "/working",
     element: <HowItWorksPage />,
   },
-   {
+  {
     path: "/profile",
     element: <ProfilePage />,
   },
@@ -32,24 +34,20 @@ export const router = createBrowserRouter([
     path: "/leaderboard",
     element: <LeaderboardPage />,
   },
-
-   {
+  {
     path: "/battlearena",
     element: <BattlePage />,
   },
-
-    {
+  {
     path: "/login",
     element: <Login />,
   },
-
-
-    {
+  {
     path: "/register",
     element: <Register />,
   },
   {
-    path: "*",
+    path: "*", // MUST ALWAYS BE LAST
     element: <NotFoundPage />,
   },
 ]);
