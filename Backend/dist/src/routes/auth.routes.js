@@ -37,8 +37,8 @@ router.get("/google/callback", passport.authenticate("google", {
         // SAVE COOKIE
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
             maxAge: 7 *
                 24 *
                 60 *
