@@ -31,7 +31,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://battle-arena-lovat.vercel.app/",
+      "https://battle-arena-lovat.vercel.app",
     ],
     credentials: true,
   })
