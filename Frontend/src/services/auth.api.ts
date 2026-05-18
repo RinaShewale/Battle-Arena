@@ -46,5 +46,5 @@ export const updateProfile = async (
 
 /* GOOGLE LOGIN */
 export const googleLogin = () => {
-  window.location.href = "http://localhost:3000/api/auth/google";
+  window.location.href = "https://battle-arena-589s.onrender.com/api/auth/google";
 };
