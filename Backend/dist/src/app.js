@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://battle-arena-ashy.vercel.app/"
+        "https://battle-arena-589s.onrender.com"
     ],
     credentials: true
 }));
