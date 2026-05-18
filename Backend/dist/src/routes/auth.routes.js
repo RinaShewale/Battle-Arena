@@ -24,13 +24,13 @@ router.get("/google", passport.authenticate("google", {
 }));
 /* ---------------- GOOGLE CALLBACK ---------------- */
 router.get("/google/callback", passport.authenticate("google", {
-    failureRedirect: "https://battle-arena-ashy.vercel.app/login",
+    failureRedirect: "https://battle-arena-lovat.vercel.app/login",
     session: false,
 }), (req, res) => {
     try {
         const user = req.user;
         if (!user) {
-            return res.redirect("https://battle-arena-ashy.vercel.app/login");
+            return res.redirect("https://battle-arena-lovat.vercel.app/login");
         }
         // GENERATE JWT
         const token = generateToken(user._id.toString());
@@ -46,16 +46,16 @@ router.get("/google/callback", passport.authenticate("google", {
                 1000,
         });
         // REDIRECT FRONTEND
-        return res.redirect("https://battle-arena-ashy.vercel.app/");
+        return res.redirect("https://battle-arena-lovat.vercel.app/");
     }
     catch (error) {
         console.log("GOOGLE CALLBACK ERROR:", error);
-        return res.redirect("https://battle-arena-ashy.vercel.app/login");
+        return res.redirect("https://battle-arena-lovat.vercel.app/login");
     }
 });
 /* ---------------- GOOGLE FAIL ---------------- */
 router.get("/google/fail", (req, res) => {
-    res.redirect("https://battle-arena-589s.onrender.com/login");
+    res.redirect("https://battle-arena-lovat.vercel.app/login");
 });
 export default router;
 //# sourceMappingURL=auth.routes.js.map

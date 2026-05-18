@@ -18,9 +18,9 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://battle-arena-589s.onrender.com"
+        "https://battle-arena-lovat.vercel.app/",
     ],
-    credentials: true
+    credentials: true,
 }));
 app.use(passport.initialize());
 /* ---------------- API ROUTES ---------------- */
