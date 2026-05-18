@@ -53,7 +53,7 @@ router.get(
   "/google/callback",
 
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: "https://battle-arena-ashy.vercel.app/login",
 
     session: false,
   }),
@@ -64,7 +64,7 @@ router.get(
 
       if (!user) {
         return res.redirect(
-          "http://localhost:5173/login"
+          "https://battle-arena-ashy.vercel.app/login"
         );
       }
 
@@ -91,7 +91,7 @@ router.get(
 
       // REDIRECT FRONTEND
       return res.redirect(
-        "http://localhost:5173/"
+        "https://battle-arena-ashy.vercel.app/"
       );
     } catch (error) {
       console.log(
@@ -100,7 +100,7 @@ router.get(
       );
 
       return res.redirect(
-        "http://localhost:5173/login"
+        "https://battle-arena-ashy.vercel.app/login"
       );
     }
   }
@@ -110,7 +110,7 @@ router.get(
 
 router.get("/google/fail", (req, res) => {
   res.redirect(
-    "http://localhost:5173/login"
+    "https://battle-arena-589s.onrender.com/login"
   );
 });
 

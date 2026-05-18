@@ -24,13 +24,13 @@ router.get("/google", passport.authenticate("google", {
 }));
 /* ---------------- GOOGLE CALLBACK ---------------- */
 router.get("/google/callback", passport.authenticate("google", {
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: "https://battle-arena-ashy.vercel.app/login",
     session: false,
 }), (req, res) => {
     try {
         const user = req.user;
         if (!user) {
-            return res.redirect("http://localhost:5173/login");
+            return res.redirect("https://battle-arena-ashy.vercel.app/login");
         }
         // GENERATE JWT
         const token = generateToken(user._id.toString());
@@ -46,16 +46,16 @@ router.get("/google/callback", passport.authenticate("google", {
                 1000,
         });
         // REDIRECT FRONTEND
-        return res.redirect("http://localhost:5173/");
+        return res.redirect("https://battle-arena-ashy.vercel.app/");
     }
     catch (error) {
         console.log("GOOGLE CALLBACK ERROR:", error);
-        return res.redirect("http://localhost:5173/login");
+        return res.redirect("https://battle-arena-ashy.vercel.app/login");
     }
 });
 /* ---------------- GOOGLE FAIL ---------------- */
 router.get("/google/fail", (req, res) => {
-    res.redirect("http://localhost:5173/login");
+    res.redirect("https://battle-arena-589s.onrender.com/login");
 });
 export default router;
 //# sourceMappingURL=auth.routes.js.map

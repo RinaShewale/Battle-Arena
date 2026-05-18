@@ -31,7 +31,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://battle-arena-589s.onrender.com/"
+      "https://battle-arena-ashy.vercel.app/"
     ],
     credentials: true
   })
