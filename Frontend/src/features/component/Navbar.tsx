@@ -116,7 +116,7 @@ export const Navbar = () => {
             </>
           ) : (
             <Link to="/register" onClick={closeMenu} className="mt-4">
-              <button className="px-12 py-3 bg-gradient-to-b from-[#d35400] to-[#a04000] text-white text-base font-bold rounded-xl shadow-lg active:scale-95 transition-transform border border-white/10">
+              <button className="px-12 py-3 bg-gradient-to-b from-[#406ea9] to-[#406ea9] text-white text-base font-bold rounded-xl shadow-lg active:scale-95 transition-transform border border-white/10">
                 Sign In
               </button>
             </Link>

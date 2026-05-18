@@ -35,7 +35,7 @@ router.post("/logout", logoutUser);
 
 
 // UPDATE PROFILE
-router.put("/profile",protect,updateProfile);
+router.put("/profile", protect, updateProfile);
 
 /* ---------------- GOOGLE AUTH ---------------- */
 
@@ -77,9 +77,8 @@ router.get(
       res.cookie("token", token, {
         httpOnly: true,
 
-        secure: false,
-
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
 
         maxAge:
           7 *
