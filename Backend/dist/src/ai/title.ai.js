@@ -9,25 +9,14 @@ const extractText = (content) => {
             .map((part) => part.text ?? "")
             .join("");
     }
-    return String(content);
+    return String(content ?? "");
 };
-export const generateBattleTitle = async (message) => {
-    try {
-        const response = await geminiModel.invoke(TITLE_PROMPT(message));
-        const raw = extractText(response.content)
-            .trim()
-            .replace(/^["'`]+|["'`]+$/g, "")
-            .replace(/\s+/g, " ");
-        if (!raw) {
-            return fallbackTitle(message);
-        }
-        const words = raw.split(" ").filter(Boolean);
-        return words.slice(0, 8).join(" ");
-    }
-    catch (error) {
-        console.log("TITLE GENERATION ERROR:", error);
-        return fallbackTitle(message);
-    }
+const cleanTitle = (title) => {
+    return title
+        .replace(/^["'`]+|["'`]+$/g, "")
+        .replace(/\n/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 };
 const fallbackTitle = (message) => {
     const cleaned = message
@@ -40,5 +29,29 @@ const fallbackTitle = (message) => {
     return cleaned.length < message.trim().length
         ? `${cleaned}…`
         : cleaned;
+};
+export const generateBattleTitle = async (message) => {
+    try {
+        if (!message?.trim()) {
+            return "New Arena Chat";
+        }
+        const response = await geminiModel.invoke(TITLE_PROMPT(message));
+        const rawText = extractText(response.content);
+        const cleaned = cleanTitle(rawText);
+        if (!cleaned) {
+            return fallbackTitle(message);
+        }
+        // keep only first 8 words
+        const words = cleaned.split(" ").filter(Boolean);
+        const shortTitle = words.slice(0, 8).join(" ");
+        if (!shortTitle.trim()) {
+            return fallbackTitle(message);
+        }
+        return shortTitle;
+    }
+    catch (error) {
+        console.log("TITLE GENERATION ERROR:", error);
+        return fallbackTitle(message);
+    }
 };
 //# sourceMappingURL=title.ai.js.map

@@ -5,6 +5,7 @@ declare const config: {
     GEMINI_API_KEY: string;
     MISTRAL_API_KEY: string;
     COHERE_API_KEY: string;
+    TAVILY_API_KEY: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
     GOOGLE_CALLBACK_URL: string;

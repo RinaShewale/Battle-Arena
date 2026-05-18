@@ -60,18 +60,27 @@ export const getBattleTurns = (battle: Battle): BattleTurn[] => {
 };
 
 export const getBattleTitle = (battle: Battle): string => {
-  if (battle.title?.trim()) {
+  // Prefer AI generated title
+  if (
+    battle.title &&
+    typeof battle.title === "string" &&
+    battle.title.trim().length > 0
+  ) {
     return battle.title.trim();
   }
 
-  const fallback = battle.problem || getBattleTurns(battle)[0]?.message || "";
+  // fallback to first message
+  const fallback =
+    battle.turns?.[0]?.message ||
+    battle.problem ||
+    "Untitled Chat";
 
-  if (!fallback) {
-    return "Untitled chat";
-  }
-
-  return fallback.length > 48 ? `${fallback.slice(0, 48)}…` : fallback;
+  return fallback.length > 48
+    ? `${fallback.slice(0, 48)}...`
+    : fallback;
 };
+
+
 
 type BattleContextType = {
   battles: Battle[];

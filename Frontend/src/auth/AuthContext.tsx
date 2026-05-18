@@ -1,9 +1,18 @@
-import { createContext, useContext } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+} from "react";
+
 import type { ReactNode } from "react";
 
 import { useAuth as useAuthHook } from "../hooks/useAuth";
 
-const AuthContext = createContext<any>(null);
+type AuthContextType = ReturnType<typeof useAuthHook>;
+
+const AuthContext = createContext<AuthContextType | null>(
+  null
+);
 
 export const AuthProvider = ({
   children,
@@ -12,11 +21,24 @@ export const AuthProvider = ({
 }) => {
   const auth = useAuthHook();
 
+  // Prevent unnecessary rerenders
+  const value = useMemo(() => auth, [auth]);
+
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be used inside AuthProvider"
+    );
+  }
+
+  return context;
+};

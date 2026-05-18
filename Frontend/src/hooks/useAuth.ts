@@ -1,135 +1,184 @@
 import { useEffect, useState } from "react";
 
 import {
-    loginUser,
-    registerUser,
-    logoutUser,
-    getProfile,
-     updateProfile,
+  loginUser,
+  registerUser,
+  logoutUser,
+  getProfile,
+  updateProfile,
 } from "../services/auth.api";
 
 type User = {
-    _id: string;
-    name: string;
-    email: string;
+  _id: string;
+  name: string;
+  email: string;
 };
 
 export const useAuth = () => {
-    const [user, setUser] =
-        useState<User | null>(null);
+  // INSTANT USER RESTORE
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored =
+        localStorage.getItem("user");
 
-    const [loading, setLoading] =
-        useState(true);
+      return stored
+        ? JSON.parse(stored)
+        : null;
+    } catch {
+      return null;
+    }
+  });
 
-    // LOAD USER
-    const loadUser = async () => {
-        try {
-            const res = await getProfile();
+  // START FALSE
+  const [loading, setLoading] =
+    useState(false);
 
-            console.log("PROFILE RESPONSE:", res);
+  // LOAD USER
+  const loadUser = async () => {
+    try {
+      setLoading(true);
 
-            if (res.success && res.user) {
-                setUser(res.user);
-            } else {
-                setUser(null);
-            }
-        } catch (error) {
-            console.log(
-                "LOAD USER ERROR:",
-                error
-            );
+      const res = await getProfile();
 
-            setUser(null);
-        } finally {
-            setLoading(false);
-        }
-    };
+      console.log(
+        "PROFILE RESPONSE:",
+        res
+      );
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            loadUser();
-        }, 500);
+      if (res.success && res.user) {
+        setUser(res.user);
 
-        return () => clearTimeout(timer);
-    }, []);
-
-    // LOGIN
-    const login = async (
-        email: string,
-        password: string
-    ) => {
-        const res = await loginUser({
-            email,
-            password,
-        });
-
-        if (res.user) {
-            setUser(res.user);
-        }
-
-        return res;
-    };
-
-    // REGISTER
-    const register = async (
-        name: string,
-        email: string,
-        password: string
-    ) => {
-        const res = await registerUser({
-            name,
-            email,
-            password,
-        });
-
-        if (res.user) {
-            setUser(res.user);
-        }
-
-        return res;
-    };
-
-    // LOGOUT
-    const logout = async () => {
-        await logoutUser();
-
+        // SAVE USER
+        localStorage.setItem(
+          "user",
+          JSON.stringify(res.user)
+        );
+      } else {
         setUser(null);
-    };
 
-    
+        localStorage.removeItem("user");
+      }
+    } catch (error) {
+      console.log(
+        "LOAD USER ERROR:",
+        error
+      );
 
-    // UPDATE PROFILE
-const updateUserProfile = async (
-  name: string
-) => {
-  try {
-    const res = await updateProfile({
-      name,
+      setUser(null);
+
+      localStorage.removeItem("user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // REMOVE DELAY
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  // LOGIN
+  const login = async (
+    email: string,
+    password: string
+  ) => {
+    const res = await loginUser({
+      email,
+      password,
     });
 
-    if (res.success) {
+    if (res.user) {
       setUser(res.user);
+
+      // SAVE USER
+      localStorage.setItem(
+        "user",
+        JSON.stringify(res.user)
+      );
     }
 
     return res;
-  } catch (error) {
-    console.log(
-      "UPDATE PROFILE ERROR:",
-      error
-    );
+  };
 
-    throw error;
-  }
-};
+  // REGISTER
+  const register = async (
+    name: string,
+    email: string,
+    password: string
+  ) => {
+    const res = await registerUser({
+      name,
+      email,
+      password,
+    });
 
-    return {
-        user,
-        loading,
-        login,
-        register,
-        logout,
-        refreshUser: loadUser,
-        isAuthenticated: !!user,
-        updateUserProfile,
-    };
+    if (res.user) {
+      setUser(res.user);
+
+      // SAVE USER
+      localStorage.setItem(
+        "user",
+        JSON.stringify(res.user)
+      );
+    }
+
+    return res;
+  };
+
+  // LOGOUT
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.log(
+        "LOGOUT ERROR:",
+        error
+      );
+    }
+
+    setUser(null);
+
+    localStorage.removeItem("user");
+  };
+
+  // UPDATE PROFILE
+  const updateUserProfile = async (
+    name: string
+  ) => {
+    try {
+      const res = await updateProfile({
+        name,
+      });
+
+      if (res.success) {
+        setUser(res.user);
+
+        // UPDATE STORAGE
+        localStorage.setItem(
+          "user",
+          JSON.stringify(res.user)
+        );
+      }
+
+      return res;
+    } catch (error) {
+      console.log(
+        "UPDATE PROFILE ERROR:",
+        error
+      );
+
+      throw error;
+    }
+  };
+
+  return {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    refreshUser: loadUser,
+    isAuthenticated: !!user,
+    updateUserProfile,
+  };
 };

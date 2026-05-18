@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useEffect } from "react";
 import {
-  Brain, Zap, ShieldCheck, Quote, 
-  MessageSquare, Code2, Search, 
+  Brain, Zap, ShieldCheck, Quote,
+  MessageSquare, Code2, Search,
   CheckCircle2, Globe
 } from 'lucide-react';
 import { gsap } from "gsap";
@@ -10,7 +10,7 @@ import Lenis from '@studio-freight/lenis';
 
 import { Navbar } from "../component/Navbar";
 import { Footer } from "../component/Footer";
-import { HeroSection } from "../section/HeroSection"; 
+import { HeroSection } from "../section/HeroSection";
 import { BackgroundSystem } from "../component/UI/BackgroundSystem";
 import { useNavigate } from "react-router-dom";
 
@@ -22,8 +22,8 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const lenis = new Lenis({ 
-      duration: 1.2, 
+    const lenis = new Lenis({
+      duration: 1.2,
       smoothWheel: true,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
@@ -32,11 +32,11 @@ const HomePage: React.FC = () => {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
+
     requestAnimationFrame(raf);
-    
+
     return () => lenis.destroy();
   }, []);
-
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>(".reveal").forEach((elem) => {
@@ -53,7 +53,7 @@ const HomePage: React.FC = () => {
         });
       });
     }, mainRef);
-    
+
     return () => ctx.revert();
   }, []);
 
@@ -77,19 +77,19 @@ const HomePage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols- 1 md:grid-cols-3 gap-16">
-            <StepCard 
+            <StepCard
               icon={<MessageSquare size={28} className="text-blue-400" />}
               step="01"
               title="Ask anything"
               desc="We give two different AI models the exact same difficult prompt at the same time."
             />
-            <StepCard 
+            <StepCard
               icon={<Search size={28} className="text-purple-400" />}
               step="02"
               title="Compare results"
               desc="Our system looks for mistakes, hallucinations, and how helpful the answer actually is."
             />
-            <StepCard 
+            <StepCard
               icon={<CheckCircle2 size={28} className="text-emerald-400" />}
               step="03"
               title="Pick a winner"
@@ -102,10 +102,10 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             <div className="md:col-span-8 group relative overflow-hidden rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 p-10 h-[550px] flex flex-col justify-end reveal">
               <div className="absolute inset-0 opacity-20 group-hover:scale-105 transition-transform duration-1000">
-                <img 
-                  src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2000&auto=format&fit=crop" 
-                  className="w-full h-full object-cover grayscale" 
-                  alt="Abstract Data" 
+                <img
+                  src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2000&auto=format&fit=crop"
+                  className="w-full h-full object-cover grayscale"
+                  alt="Abstract Data"
                 />
               </div>
               <div className="relative z-10">
@@ -159,14 +159,14 @@ const HomePage: React.FC = () => {
 
         <section className="py-48 text-center px-6 relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
-          
+
           <div className="relative z-10 reveal">
             <h2 className="text-6xl md:text-[100px] font-light tracking-tighter leading-[0.9] mb-16">
               Ready to see <br /> <span className="opacity-20">the winners?</span>
             </h2>
-            
+
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <button onClick={()=> navigate("/battlearena")} className="h-20 px-16 bg-white text-black rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.1)]">
+              <button onClick={() => navigate("/battlearena")} className="h-20 px-16 bg-white text-black rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.1)]">
                 Enter the Arena
               </button>
               <button onClick={() => navigate("/about")} className="h-20 px-16 border border-white/10 rounded-full font-medium text-xl hover:bg-white/5 transition-colors">
