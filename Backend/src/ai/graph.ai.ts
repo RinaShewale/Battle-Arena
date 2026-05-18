@@ -12,12 +12,12 @@ import {
   mistralModel,
   geminiModel,
   cohereModel,
-} from "../ai/model.ai";
+} from "../ai/model.ai.js";
 
 import {
   JUDGE_PROMPT,
   SYSTEM_PROMPT,
-} from "../ai/prompt.ai";
+} from "../ai/prompt.ai.js";
 
 // ---------------- STATE ----------------
 const state = new StateSchema({

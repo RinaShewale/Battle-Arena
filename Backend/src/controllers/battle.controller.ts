@@ -13,6 +13,12 @@ import {
   type MessageAttachments,
 } from "../services/battle.service.js";
 
+/* ---------------- SAFE ID HELPER ---------------- */
+const getSafeId = (id: unknown): string | null => {
+  if (typeof id !== "string") return null;
+  return id.trim() || null;
+};
+
 /* ---------------- USER HELPER ---------------- */
 const getUserId = (req: Request): string => {
   return (req as any).user?.id;
@@ -153,14 +159,14 @@ export const getBattles = async (req: Request, res: Response) => {
 export const appendBattleMessage = async (req: Request, res: Response) => {
   try {
     const userId = getUserId(req);
-    const { id } = req.params;
+    const id = getSafeId(req.params.id);
 
     const rawMessage = getRawMessage(req.body);
 
     if (!id || !rawMessage) {
       return res.status(400).json({
         success: false,
-        message: "Battle ID and message required",
+        message: "Invalid battle ID or message",
       });
     }
 
@@ -181,7 +187,6 @@ export const appendBattleMessage = async (req: Request, res: Response) => {
     const turn = createTurnFromGraphResult(rawMessage, result);
 
     battle.turns = battle.turns || [];
-
     battle.turns.push(turn);
 
     syncBattleLatestFields(battle, turn);
@@ -203,17 +208,17 @@ export const appendBattleMessage = async (req: Request, res: Response) => {
   }
 };
 
-/* ---------------- RENAME BATTLE (FIXED) ---------------- */
+/* ---------------- RENAME BATTLE ---------------- */
 export const renameBattle = async (req: Request, res: Response) => {
   try {
     const userId = getUserId(req);
-    const { id } = req.params;
+    const id = getSafeId(req.params.id);
     const { title } = req.body;
 
-    if (!title?.trim()) {
+    if (!id || !title?.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Title required",
+        message: "Invalid data",
       });
     }
 
@@ -242,11 +247,18 @@ export const renameBattle = async (req: Request, res: Response) => {
   }
 };
 
-/* ---------------- DELETE BATTLE (FIXED) ---------------- */
+/* ---------------- DELETE BATTLE ---------------- */
 export const deleteBattle = async (req: Request, res: Response) => {
   try {
     const userId = getUserId(req);
-    const { id } = req.params;
+    const id = getSafeId(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid battle ID",
+      });
+    }
 
     const battle = await Battle.findOneAndDelete({
       _id: id,
@@ -277,8 +289,15 @@ export const deleteBattle = async (req: Request, res: Response) => {
 export const judgeBattle = async (req: Request, res: Response) => {
   try {
     const userId = getUserId(req);
-    const { id } = req.params;
+    const id = getSafeId(req.params.id);
     const { winner } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID",
+      });
+    }
 
     const battle = await Battle.findOne({ _id: id, userId });
 
@@ -306,17 +325,10 @@ export const judgeBattle = async (req: Request, res: Response) => {
   }
 };
 
-/* ---------------- WEB SEARCH (placeholder safe) ---------------- */
+/* ---------------- WEB SEARCH ---------------- */
 export const webSearch = async (req: Request, res: Response) => {
-  try {
-    return res.status(200).json({
-      success: true,
-      message: "Web search endpoint working",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Web search failed",
-    });
-  }
+  return res.status(200).json({
+    success: true,
+    message: "Web search endpoint working",
+  });
 };
